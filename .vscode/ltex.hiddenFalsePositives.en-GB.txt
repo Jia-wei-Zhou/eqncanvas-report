@@ -1,1 +1,2 @@
 {"rule":"MORFOLOGIK_RULE_EN_GB","sentence":"^\\QThe frontend is built upon NextJS, and the backend is built upon NestJS.\\E$"}
+{"rule":"PHRASE_REPETITION","sentence":"^\\QFunctions were divided into several parts and each part was added after previous part passed tests: Users can draw on the canvas The canvas can output stroke data\\E$"}
