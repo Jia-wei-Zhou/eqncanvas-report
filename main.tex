@@ -286,6 +286,8 @@ firstly to add a new input type in \code{ResponseArea}, but this needs to change
 
 Details of \code{ExpressionInput} and the process of integration will be presented in Chapter \ref{imp-react}.
 
+Moreover, Lambda Feedback has used many components from Material UI to structure and style the webpage. This project thus uses MUI as well for adaption to Lambda Feedback and convenience.
+
 Chapter \ref{bgIntegrationLF} has investigated features of React and the
 component where this project is installed in Lambda Feedback. The next section
 will then discover different choices to realise a handwriting canvas.
@@ -448,10 +450,12 @@ This chapter records the background research on React framework, handwriting can
 
 Following the three steps mentioned in Chapter \ref{Background}, this chapter is divided into three sections as well, each explaining the implementation of one step.
 
-It should be noted that before installing the component into Lambda Feedback, the frontend part and backend part are not seperated for the purpose of the convenience of development and test. This means that the Vanilla JS web application and React component contain the \textit{API Key} for requesting \textit{App Token}.
+It should be noted that before installing the component into Lambda Feedback, the frontend part and backend part are not seperated for the convenience of development and test. This means that the Vanilla JS web application and React component contain the \textit{API Key} for requesting \textit{App Token}.
 
 \section{Vanilla JS Web Application}
-The first objective of the project is to develop a web application in Vanilla JS. The application
+The first stage of the project is to develop a web application in Vanilla JS. This is to figure out the structure of the application and the working process of the programme, and focus on the JavaScript code but not React features.
+
+The application
 requests an \textit{App Token} when being launched. It has a handwriting area
 for the user to draw, and when the user finishes a stroke, i.e. the pointer goes
 up, it should automatically send the stroke data to \textit{Mathpix} server.
@@ -622,24 +626,154 @@ Function \code{redo} has opposite logic of \code{undo}, and can be easily implem
     \label{fig:flowchart-undoredo}
 \end{figure}
 
-The implementation of the Vanilla JS web application is completed, and the result and evaluation will be demonstrated in Chapter \ref{Results}. The next section will focus on the conversion from Vanilla JS application to React component.
+The implementation of the Vanilla JS web application is completed, and a test is carried out to validate that all functions are working. Figure \ref{fig:vanillajs-result} is a screenshot of the application.
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=\linewidth]{figures/vanillajs-result1.png}
+    \caption{Screenshot of Vanilla JS Application}
+    \label{fig:vanillajs-result}
+\end{figure}
+
+It can be seen from Figure \ref{fig:vanillajs-result} that though the application has realised all functions, the content in the writing area (\code{canvas}) is blurry. This will be fixed in the next step.
+
+After examining the functionality of the application, the project moves to the next stage - conversion to React component. 
 
 \section{Convert to React component}
 \label{imp-react}
+Now that the Vanilla JS application has implemented the required functions, this chapter will then discuss the conversion to React component to adapt to Lambda Feedback.
+
 To convert from Vanilla JS to React component, the programme is restructured into sub-components according to functions:
 \begin{itemize}
-    \item \code{Canvas}
-    \item \code{FullScreenDialog}
-    \item \code{Navbar}
-    \item \code{Path}
+    \item \code{Canvas}: the area where users draw. 
+    \item \code{FullScreenDialog}: a container to wrap the component so that it can be installed in Lambda Feedback.
+    \item \code{Navbar}: the toolbar to place function buttons.
+    \item \code{Path}: display one stroke
 \end{itemize}
 
-All sub-components are wrapped in a parent component \code{HandwritingInput},
-where most functions are deployed.
+Besides, a type \code{Point} is created to represent the position of a point.
 
-It should be noted that for the handwriting canvas of the React component, the
+All sub-components are wrapped in a parent component \code{HandwritingInput},
+where most functions are deployed. It receives events from sub-components, executing corresponding functions to the events and distribute the changes to sub-components. Variables in Vanilla JS application are included in the parent component as React state variables.
+Figure \label{fig:react-component-structure} shows the structure of the component.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.6\linewidth]{figures/react-component-structure.png}
+    \caption{Structure of the React Component}
+    \label{fig:react-component-structure}
+\end{figure}
+
+It should be noted that for the handwriting area of the React component, the
 \code{canvas} element is replaced with \code{SVG} element. This thus leads to a
-new sub-component \code{Path}, which will be explained later in this section.
+new sub-component \code{Path}. This is the only change in the conversion in terms of implementation of functionalities. 
+
+Similar to Vanilla JS, the React component is built in the order of functions.
+
+\subsection*{Handwriting Area}
+The logic of adding strokes to \code{strokeList} remains the same, but instead of using \code{addEventListner}, events and functions are bound via attributes. 
+
+Component \code{HandwritingInput} has three functions, \code{handlePointerDown},
+\code{handlePointerMove} and \code{handlePointerUp}, which have same
+functionalities as handling functions in Vanilla JS app except for getting the position of the pointer, as this happens in \code{Canvas}. These functions are
+passed to component \code{Canvas} as function typed attributes
+\code{onPointerDown}, \code{onPointerMove} and \code{onPointerUp} respectively.
+This allows \code{Canvas} to let \code{HandwritingInput} execute handling
+functions by calling the 'on' functions inside \code{Canvas} component. 
+
+In \code{Canvas}, three 'handle' functions are created, which gets the position of the pointer, and invoke the 'on' functions with the position as the parameter. Now, calling a 'handle' function inside \code{Canvas} does all functionalities same in Vanilla JS app.
+
+To call 'handle' functions in response to a pointer event, they have to be bound
+to the \code{SVG} element. The \code{SVG} element is created in the
+\code{return} command. It also has \code{onPointerDown}, \code{onPointerMove}
+and \code{onPointerUp} attributes, which can be bound to a function so that
+everytime the 'on' attribute triggers (pointer down/move/up), the corresponding
+function is called. 'Handle' functions in \code{Canvas} are then passed to attributes of the \code{SVG} element created inside. Thus, all functions that should react to an event are chained.
+ 
+Figure \ref{fig:react-handwriting-area} shows the structure of the handwriting area.
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=\linewidth]{figures/react-handwriting-area.png}
+    \caption{Structure of Handwriting Area in React Component}
+    \label{fig:react-handwriting-area}
+\end{figure}
+
+It is worth noting that handlers in \code{HandwritingInput} does not draw
+strokes like Vanilla JS app. This is because strokes in this component are
+displayed by \code{Path} components inside \code{SVG} element, and when \code{strokeList} is updated, all
+\code{Path}s update automatically. This is done by mapping \code{strokeList} to
+\code{Path}s, each \code{Path} component is distributed a stroke from
+\code{strokeList} with a key equal to the index of the stroke. Therefore, any
+change made to \code{strokeList} will make React rerender the \code{Path}s.
+
+\code{Path} component has an attribute named \code{stroke}, which receives an
+array of type \code{Point}. Inside \code{Path}, \code{stroke} is parsed and a
+string of path data is generated. Path data is then attached to the attribute of
+element \code{path} so that the stroke is drawn.
+\begin{figure}
+    \centering
+    \includegraphics[width=0.8\linewidth]{figures/path-structure.png}
+    \caption{Displaying Strokes}
+    \label{fig:path-structure}
+\end{figure}
+
+Figure \ref{fig:path-structure} illustrates how \code{Path}s are generated and
+strokes are displayed.
+
+So far, the handwriting area has been converted to React component. The next step is to implement the equation recognition function.
+
+\subsection*{Equation Recognition}
+Same as Vanilla JS app, requests are made by \code{fetch} function. However,
+stroke data is stored differently from Vanilla JS app in \code{strokeList}. In
+previous stage, stroke data is stored in the method required by
+\textit{Mathpix}, an example of one stroke \code{strokeList} is:
+
+\centerline{\code{\{x: [x1, x2, x3...], y:[y1, y2, y3...]\}}}
+
+However, to distribute strokes to \code{Path}, stroke data must be stroed like:
+
+\centerline{\code{[Point1, Point2, Point3...]}}
+
+Hence, a function \code{transformData} is written to transform \code{strokeList}
+to \code{strokeUpload} with the data structure required by \textit{Mathpix}. This function is invoked in \code{undo}, \code{redo}, \code{remove} and \code{handleMouseUp}.
+
+Another change made is that the request function is no longer called
+\code{handleMouseUp} and three button functions. Instead, the React feature
+\code{useEffect} on \code{strokeUpload}: when this variable changes, the request
+function is called. A benifit of doing so is decreasing the couple between the
+request function and the component, so that when the function needs to be
+isolated, only a few code has to be maintained.
+
+As to rendering the result, there is no difference with Vanilla JS app. The
+component \code{ResultArea} receives a string of latex styled result as its
+attribute, and uses Katex to render the string inside a \code{span} element. The
+result string \code{renderString} is parsed from the response of recognition
+request in \code{HandwritingInput} component.
+
+Now that recognition part is finished, the toolbar and related functions are to be installed. 
+
+\subsection*{Toolbar Implementation}
+Methods \code{undo}, \code{redo}, \code{delete} and \code{remove} remain the same as Vanilla JS app. At this step, it is only necessary to consider how to transplant the methods to the component \code{Navbar}.
+
+The \code{Navbar} has a MUI component \code{Appbar}, which aligns its sub-components in a toolbar. Here, four MUI component \code{Button}s are added, each representing one function.
+
+Methods are implemented in \code{HandwritingInput} as they need data from the parent component. Therefore, to bind them with corresponding buttons, they are passed to the corresponding attribute, \code{onClick}, provided by each button. After that, each method can be called by clicking its button.
+
+Functions are all implemented in the React component. However, it is still a web page as it is not wrapped. To work in Lambda Feedback, it must be wrapped so that it can be used as a component but not a web page.
+
+\subsection*{Wrap the Component}
+The component is wrapped in component \code{FullScreenDialog}. It contains a MUI component \code{Dialog}, and sets it to type 'fullScreen'. Using full screen is to provide enough space for the users to draw. A slide animation is added when opening the dialog so that it looks more fluent. 
+
+The \code{FullScreenDialog} component wraps \code{Navbar}, \code{Canvas} and \code{ResultArea}, and is under \code{HandwritingInput}. A button is created to open the dialog.
+
+The implementation of the React component is completed. A test was carried out
+to check if the component works correctly. Figure
+\ref{fig:react-component-webpage} shows that only a button displays when opening the React project - the component is wrapped.
+\begin{figure}
+    \centering
+    \includegraphics[width=0.4\linewidth, frame]{figures/react-component-button.png}
+    \caption{React Component Web Page}
+    \label{fig:react-component-webpage}
+\end{figure}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter{Experimental Results}
