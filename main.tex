@@ -768,12 +768,94 @@ The \code{FullScreenDialog} component wraps \code{Navbar}, \code{Canvas} and \co
 The implementation of the React component is completed. A test was carried out
 to check if the component works correctly. Figure
 \ref{fig:react-component-webpage} shows that only a button displays when opening the React project - the component is wrapped.
-\begin{figure}
+\begin{figure}[h]
     \centering
     \includegraphics[width=0.4\linewidth, frame]{figures/react-component-button.png}
     \caption{React Component Web Page}
     \label{fig:react-component-webpage}
 \end{figure}
+
+Figure \ref{fig:react-component-dialog} is a screenshot when the dialog is
+opened. It can be found that the strokes in the canvas is not blurry due to the
+use of \code{SVG} element.
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=\linewidth, frame]{figures/react-component-dialog.png}
+    \caption{React Component}
+    \label{fig:react-component-dialog}
+\end{figure}
+
+After the React component works, it should be integrated into Lambda Feedback.
+
+\section{Integration to Lambda Feedback}
+As mentioned in Chapter \ref{bgIntegrationLF}, the handwriting component is added as an extension of type \code{ExpressionInput} in component \code{ResponseArea}. 
+
+\code{ResponseArea} is a component for the user to input their answer and check
+if it is correct. \code{ExpressionInput} is a component of \code{ResponseArea}
+that has a textbox for the user to input math expression and a preview box for
+previewing the expression. Figure \ref{fig:expressioninput-before} is a screenshot of the component \code{ExpressionInput} before handwriting input is integrated.
+\begin{figure}
+    \centering
+    \includegraphics[width=0.9\linewidth, frame]{figures/expressioninput-before.png}
+    \caption{\code{ExpressionInput} before Integration}
+    \label{fig:expressioninput-before}
+\end{figure}
+
+To install handwriting input component, a folder named 'HandwritingInput' is created in \code{ExpressionInput}, and the code is moved in.
+
+In the handwriting input component, all sub-components are controlled
+internally. Hence, only the parent component \code{HandwritingInput} needs to be
+modified to work in \code{ExpressionInput}.
+
+There is only one variable that \code{ExpressionInput} needs from
+\code{HandwritingInput}, which is the string of latex styled result. The
+original text input box uses an anonymous function, where a syntax of
+\code{target: {value}} is used to fetch the value in the input box. However, a
+compile warning is suggesting that this 'target' config is deprecated and will
+be removed in future version. Therefore, the \code{HandwritingInput} component
+did not use the same approach. Instead, several attributes were exported from
+\code{HandwritingInput} so that \code{ExpressionInput} can pass functions that
+require the latex string to the attributes. The functions are:
+\begin{itemize}
+    \item \code{handleChange}: the function to react to changes in the input. It is passed to attribute \code{submitResult} of \code{HandwritingInput}
+    \item \code{previewResult}: the function that submits the result to the preview section. This is passed to attribute \code{previewResult} of \code{HandwritingInput}.
+    \item \code{setLatexString}: this function sets the state variable
+    \code{latexString}, which is created to save the latex result string to
+    update the result to the input box, so that when the user want to slightly
+    modify the expression, they can switch back to text input and edit the
+    expression by keyboard. This is passed to attribute \code{returnResult} of
+    \code{HandwritingInput}
+\end{itemize}
+
+Now that three functional attributes are added to \code{HandwritingInput}, it
+should be clarified where they are used. There is a submit button on the right
+top of the component. A function \code{handleSubmit} is passed to its attribute
+\code{onClick}, so that when clicking on the button, the function is called.
+Inside \code{handleSubmit}, all the three functions plus a function to close the
+dialog are invoked. The three functions are given the parameter
+\code{latexString} parsed from the result, so that data is transmitted to
+\code{ExpressionInput}. It should be noted that \code{previewResult} has a type
+of 'function OR undefined', so it is only invoked when it is defined.
+
+Apart from the three functional attributes, there are other attributes needed to be defined by \code{ExpressionInput}:
+\begin{itemize}
+    \item \code{height}: the height of the writing area. Defaultly 500px
+    \item \code{width}: the width of the writing area. Defaultly 1000px
+    \item \code{linewidth}: the width of the strokes. Defaultly 3px
+    \item \code{open}: boolean flag that controls if the dialog is open or close.
+\end{itemize}
+
+The connection between \code{HandwritingInput} and \code{ExpressionInput} is
+established. To use handwriting input, there should be an approach to open it.
+The purpose of this stage is to add the handwriting component to
+\code{ExpressionInput}, and its original functions should be retained.
+Therefore, a toggle is used so that the user can switch between handwriting
+input and keyboard input. MUI component \code{Switch} is used as the toggle. The toggle controls a state variable \code{useHandwrite}. When the toggle is on, \code{useHandwrite} equals false, vice versa.
+
+Beside the toggle, a button is set to open the handwriting input dialog. The
+button also controls a state variable \code{dialogOpen}, which is passed to
+attribute \code{open} to control the state of the handwriting input dialog.
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter{Experimental Results}
