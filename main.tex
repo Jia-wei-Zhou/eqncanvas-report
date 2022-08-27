@@ -453,6 +453,7 @@ Following the three steps mentioned in Chapter \ref{Background}, this chapter is
 It should be noted that before installing the component into Lambda Feedback, the frontend part and backend part are not seperated for the convenience of development and test. This means that the Vanilla JS web application and React component contain the \textit{API Key} for requesting \textit{App Token}.
 
 \section{Vanilla JS Web Application}
+\label{vanillajs-implement}
 The first stage of the project is to develop a web application in Vanilla JS. This is to figure out the structure of the application and the working process of the programme, and focus on the JavaScript code but not React features.
 
 The application
@@ -567,6 +568,8 @@ Now, the flowchart of function \code{handleMouseUp} becomes Figure \ref{fig:flow
     \caption{Flowchart of \code{handleMouseUp} for Recognition}
     \label{fig:flowchart2}
 \end{figure}
+
+Another thing to notice is that, the live update session has a time limit of 300 seconds. To ensure the user does not need to refresh the page when the session is expired, the application sends another \textit{APP Token} requests when it receives an \code{unauthorized} error in recognition request. After the \textit{APP Token} is updated, the recognition request is resent.
 
 This section records the implementation of recognition and render. The next section will explain how undo, redo, delete and remove functions are implemented.
 
@@ -784,8 +787,11 @@ use of \code{SVG} element.
     \caption{React Component}
     \label{fig:react-component-dialog}
 \end{figure}
+\\
 
-After the React component works, it should be integrated into Lambda Feedback.
+The Vanilla JS application is converted to a React component. However, it is still in JavaScript, whereas Lambda Feedback is developed in TypeScript. Therefore, the whole programme was refactored to TypeScript. 
+
+The process is simple and took only two hours. After this, it should be integrated into Lambda Feedback.
 
 \section{Integration to Lambda Feedback}
 As mentioned in Chapter \ref{bgIntegrationLF}, the handwriting component is added as an extension of type \code{ExpressionInput} in component \code{ResponseArea}. 
@@ -893,29 +899,164 @@ evaluation is given as well.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter{Experimental Results}
 \label{Results}
-Chapter \code{Implementation} records the process of the implemention of this project, and in this chapter, a series of tests is carried out and results along with an evaluation is provided.
+Chapter \ref{Implementation} records the process of the implemention of this project, and in this chapter, a series of tests is carried out and results along with an evaluation is provided.
 
-\subsection*{Appearence of \code{ExpressionInput}}
-Figure 
+\section{Tests and Results}
+\label{tests-results}
+\subsection*{Appearence of Expression Input}
+Figure \ref{fig:component-appearence} is a screenshot of the expression input.
+Comparing with Figure \ref{fig:expressioninput-before}, it can be seen that a
+button and a toggle is added over the text input to open and switch to
+handwriting input.
 \begin{figure}[h]
     \centering
     \includegraphics[width=\linewidth, frame]{figures/component-appearence.png}
-    \caption{Appearence of Component \code{ExpressionInput}}
+    \caption{Appearence of Expression Input Component}
     \label{fig:component-appearence}
 \end{figure}
+
+Either clicking the button or turning on the toggle opens the handwriting input dialog shown in Figure \ref{fig:handwriting-plain}
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=\linewidth, frame]{figures/handwriting-dialog-plain.png}
+    \caption{Handwriting Input Dialog}
+    \label{fig:handwriting-plain}
+\end{figure}
+
+\subsection*{Handwriting Input Tests}
+The handwriting input component is tested to verify its functionalities.
+
+Figure \ref{fig:test-write} shows that the component is able to recognise and display the equation written in writing area.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\linewidth, frame]{figures/test-write.png}
+    \caption{Writing Test}
+    \label{fig:test-write}
+\end{figure}
+
+Undo, redo, delete and remove functions works as well. Figure \ref{fig:test-remove} is an example of the remove function, where the '+' operator is removed, and the result updates.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\linewidth, frame]{figures/test-remove.png}
+    \caption{Remove Function Test}
+    \label{fig:test-remove}
+\end{figure}
+
+\subsection*{Integration Tests}
+After the tests on handwriting input, the result is checked to see if it is submitted, and the component is integrated successfully.
+
+The answer is set to $\log x y=\log x+\log y$. Figure
+\ref{fig:test-check-correct} shows that the result is evaluated correct, and the
+preview session works as well.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\linewidth, frame]{figures/test-check-correct}
+    \caption{Check a Correct Answer}
+    \label{fig:test-check-correct}
+\end{figure}
+
+An incorrect answer is tested as well, and the result is shown in Figure \ref{fig:test-check-wrong}.
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=\linewidth, frame]{figures/test-check-wrong.png}
+    \caption{Check an Incorrect Answer}
+    \label{fig:test-check-wrong}
+\end{figure}
+
+When switching back to text input, the equation automatically exists in the box in latex styled text. This is shown in Figure \ref{fig:test-switch-back}.
+\begin{figure}
+    \centering
+    \includegraphics[width=\linewidth, frame]{figures/test-switch-back.png}
+    \caption{Switch Back To Text Input}
+    \label{fig:test-switch-back}
+\end{figure}
+
+As mentioned in Chapter \ref{vanillajs-implement}, the session has a time limit
+of 300 seconds. To check if the session is automatically extended, a test is
+carried out. Handwriting input was done 6 minutes after the dialog was opened,
+and the component is still able to recognise and display the equation with
+little lag.
+\\
+
+One concern of the component is about the latex string obtained from
+\textit{Mathpix}. Although \textit{Mathpix} service focuses on mathematical
+equation recognition, the latex string it returns is not guaranteed to be a
+latex math string. Instead, it has several types, including \code{text},
+\code{math} and \code{tabel} etc. Although non-math types can be filtered when
+obtaining the result and thus give a gentle warning to the user that the
+handwriting is not recognised as an equation, it sometimes happens that some simple equations, such as $2x+1$, are returned with the type of \code{text} as it does not contain any special mathematical operator. These latex strings can still be evaluated by Lambda Feedback, but they are not \code{math} type. As other types are very different to an equation, which would not affect the result, the response obtained from \textit{Mathpix} is not filtered.
+
+To ensure this does not worsen user experience, a test was carried out. Many
+equations, from simple to complicated, were input and checked if they display in
+the live expression preview, as they are resolved in this session. It turned out
+that most equations can be successfully resolved by the preview session. The
+exceptions are equations that contain the lambda symbol ($\lambda$) - the result
+is shown in Figure \ref{fig:test-lambda}. Other symbols including greek letters
+were tested and resolved normally, whereas they are not all symbols that might
+appear in an equation so there is no guarantee this phenomenon would not occur
+on other symbols. This is considered as a problem related to the evaluation function,
+\code{latexEqual}, and needs further imporvement.
+\begin{figure}
+    \centering
+    \includegraphics[width=\linewidth, frame]{figures/test-lambda.png}
+    \caption{Test Lambda Symbol}
+    \label{fig:test-lambda}
+\end{figure}
+
+Consequently, in most cases, type of the latex string has minor impact to the user
+experience. The lambda symbol problem is probably not related to the types.
+
+
+\section{Evaluation}
+In Chapter \ref{tests-results}, a series of tests were carried out. The results
+show that the component is able to provide a complete handwriting input approach
+for the user to input mathematical expressions. The recognition is accurate,
+live update is available and response is quick. The answer can be passed to the
+parent component and checked by Lambda Feedback's evaluation function. It can also
+be displayed in the text input box in the format of latex string. Although there are many possible types of latex string returned by \textit{Mathpix}, it is considered having insignificant impact to user experience. However, the problem of the lambda symbol still needs to be solved.
+
+Despite the functionalities being generally good in Lambda Feedback, the
+handwriting input component has not seperated its backend and frontend, i.e. the
+\textit{API Key} for \textit{Mathpix} is still in frontend code. It means that
+the update cannot be published and put into practical use yet. This is because
+of limited time of the project. In spite of this, the backend code is simple:
+make a request for \textit{APP Key} to \textit{Mathpix} surver. Therefore, it
+should be quick for a developer who is familiar with the backend of Lambda
+Feedback to implement this.
+
+Overall, the handwriting input component works well in terms of functionality
+and integration with Lambda Feedback. Regarding the code writing, only one file
+of programme in Lambda Feedback frontend is modified, and one folder is added in
+the \code{ExpressionInput} folder, which makes maintaince and debugging easier.
+However, the backend still needs to be seperated.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter{Conclusion}
 \label{Conclusion}
+In this project, a handwriting input component for mathematical expression is developed and added to the online learning system Lambda Feedback.
 
+Firstly, a web application is developed in Vanilla JavaScript to learn the
+problem and figure out solutions. Then, the application is converted to a React
+component in TypeScript to fit Lambda Feedback. Finally, it is integrated into
+the system, and several updates were done afterwards.
+
+A series of tests were conducted to verify the functionality and robustness of
+the component in Lambda Feedback. The results indicate that its functionalities
+are generally good, but has a problem with the lambda symbol. Despite this, the
+project did not manage to seperate its frontend and backend, and the update
+cannot be published yet.
+
+\section*{Future Improvements}
+There are several future improvements planned:
+\begin{enumerate}
+    \item Seperate the backend. This is necessary for the project. The token request function should be implemented into the backend and the function in client end should be requesting the backend for the token.
+    \item Add new method for removing stroke. Users might find it unconvenient to switch between 'draw' mode and 'remove' mode. A new method that drawing a circle would remove strokes inside, or black out a symbol to remove it is planned to be developed.
+    \item Error handling. Although current programme has some error handlings, they do not cover all errors such as an error object is returned from \textit{Mathpix}. This rarely happens but still needs to be done.
+\end{enumerate}
 
 %% bibliography
 \bibliographystyle{vancouver}
 \bibliography{mybibs}
-
-\chapter{Appendices}
-\label{Appendices}
-
 
 \end{document}
