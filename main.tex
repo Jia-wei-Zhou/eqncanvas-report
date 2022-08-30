@@ -6,10 +6,10 @@
 % Edit these to provide the correct information
 % e.g. \newcommand{\reportauthor}{Timothy Kimber}
 
-\newcommand{\reporttitle}{Title}
-\newcommand{\reportauthor}{Your name}
-\newcommand{\supervisor}{Name of supervisor}
-\newcommand{\degreetype}{Type of Degree}
+\newcommand{\reporttitle}{A Handwriting Math Expression Input Component For Online Learning System}
+\newcommand{\reportauthor}{Jiawei Zhou}
+\newcommand{\supervisor}{Jason Bailey\\Andrea Callia D'Iddio}
+\newcommand{\degreetype}{MSc Computing Science}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -35,13 +35,19 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{abstract}
-Your abstract.
+Department of engineering of the college is developing an online learning system, Lambda
+Feedback, to enhance user experience on online assignment and assessment. The
+system can check the correctness of an answer to a question. The format of the
+answer includes mathematical expressions, but the system only supports keyboard
+input for equations. This project thus develops a handwriting mathematical
+expression input component for Lambda Feedback, and integrates it to the system.
+The component allows users to write mathematical expressions with mouse or pointer, recognises them and submits the result to the system. This report records the process of development, presents results and gives an evaluation of the project.
 \end{abstract}
 
 \cleardoublepage
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section*{Acknowledgments}
-Comment this out if not needed.
+I would like to express my deepest appreciation to my supervisors, Jason Bailey and Andrea Callia D'Iddio, who guided me throughout the project. I would also like to thank the technical support provided by the Lambda Feedback team, especially Pierre Tharreau. Lastly, I wish to acknowledge my family and friends for their emotional support.
 
 \clearpage{\pagestyle{empty}\cleardoublepage}
 
@@ -82,9 +88,9 @@ London moved their courses online during lockdowns. These courses are taught
 based on online systems. However, some online systems are not capable of
 conducting the digitalisation of teaching tasks such as lecture
 recording/playing and assignment marking etc. For example, some departments of  Imperial College
-London were using Möbius for online assignment and assessment, but it was complained by students and staffs that the system was hard to use. This thus leads to a demand of updating or developing new systems so that students and teachers can get better experience.
+London were using Möbius for online assignment and assessment, but students and staff found it cumbersome. This thus leads to a demand of updating or developing new systems so that students and teachers can get better experience.
 
-Therefore, the college has decided to develop a new online learning system named
+Therefore, department of engineering of the college has decided to develop a new online learning system named
 Lambda Feedback. This system is a web application which allows students to do assignments posted by teachers and get feedback immediately. Comparing to its predecessor Möbius, Lambda
 Feedback has modern user interface, friendly interaction and much more features.
 One of the features is the expression input. In many assignment questions,
@@ -109,10 +115,13 @@ special situations.
 This project thus aims to develop a component with handwriting input and
 equation recognition, and integrate it to the Lambda Feedback system. The
 component shall enable the users to write on it either via mouse/touchpad on
-computers or fingers/pens on mobile devices. After users finish a stroke, it should
-be able to recognize the equation and display the result alongside the writing
-area. Integration with the Lambda Feedback system should be carried out after
-the component is tested available.
+computers or fingers/pens on mobile devices. The component should be able to
+recognise the equations written by the user, and display the text result
+alongside the writing area. Live update is needed, which means when the user
+finishes a stroke (i.e. a path is drawn and the user releases the pointer), the
+component should automatically conducts the recognition. Integration with the
+Lambda Feedback system should be carried out after the component is tested
+available.
 
 This report records the development of the project. Chapter \ref{Background}
 investigates several approaches to realise the software component and analyses
@@ -186,7 +195,7 @@ Overall, the procedure of the project is:
 Despite using different frameworks during the procedure, the approaches to realise functionalities are the same. Hence, the background research mainly focuses on three parts:
 \begin{itemize}
     \item React framework and integration with the Lambda Feedback
-    \item A canvas where users can draw stuffs
+    \item A canvas where users can draw equations using mouse or pointer
     \item Functionality of mathematical equation recognition
 \end{itemize}
 Therefore, the remaining part of this chapter is divided into three sections, each introducing one part. 
@@ -438,7 +447,7 @@ In conclusion, \textit{Mathpix} is the best choice regarding accuracy, cost and 
 
 Another thing to be noted is the equation rendering. \textit{Mathpix} can return a latex styled string of the result, but the string cannot be displayed as an equation in web page. Therefore, a rendering tool is needed to parse the latex string and display the equation in the web page. 
 
-This project uses \code{Katex}, which is the same tool used in \textit{Mathpix}. It can render a latex styled equation in one line of code \cite{web:katexapi}. Details will be 
+This project uses \code{Katex}, which is the same tool used in Lambda Feedback. It can render a latex styled equation in one line of code \cite{web:katexapi}. Details will be explained in Chapter \ref{vanillajs-implement}.
 
 This chapter records the background research on React framework, handwriting canvas to use and method of equation recognition, and givs reasons why \code{SVG} element and \textit{Mathpix} are used in the project. In Chapter \ref{Implementation}, the implementation of the Vanilla JS application, conversion to React component and integration with Lambda Feedback is explained.
 
