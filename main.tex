@@ -151,7 +151,7 @@ The component to develop is a TypeScript (strong typed version of JavaScript) we
     \item Ability to recognise the equation written on canvas and display the result
 \end{enumerate}
 
-In addition, the application should include some functions for editing the user's drawing, such as undo, redo, delete all and remove stroke.
+In addition, the application should include some functions for editing the user's drawing, such as undo, redo, delete all and remove stroke. A stroke means a path drawn by the user. 
 
 Moreover, the component should be integrated into Lambda Feedback, so it is necessary to introduce the system because they will use same frameworks and language.
 
@@ -280,6 +280,7 @@ When \code{state} changes, function in \code{useEffect} is invoked.
 \subsection*{Hook: \code{useRef}}
 \label{subsec:useRef}
 \code{useRef} creates a reference to an element in the component, so that APIs of the element can be used, and other functions can refer to this element.
+\\
 
 These are the main React features of that will be utilised in this project for the React component. 
 
@@ -296,6 +297,7 @@ firstly to add a new input type in \code{ResponseArea}, but this needs to change
 Details of \code{ExpressionInput} and the process of integration will be presented in Chapter \ref{imp-react}.
 
 Moreover, Lambda Feedback has used many components from Material UI to structure and style the webpage. This project thus uses MUI as well for adaption to Lambda Feedback and convenience.
+\\
 
 Chapter \ref{bgIntegrationLF} has investigated features of React and the
 component where this project is installed in Lambda Feedback. The next section
@@ -309,8 +311,23 @@ A handwriting canvas is needed for the component, which should do the following:
     \item Users can draw and edit stuffs
     \item The canvas can output the content, either by image or stroke data
 \end{itemize}
-Here, stroke data means positions that represent points on the strokes. For
-example, stroke \code{\{1, 1\}, \{2, 2\}, \{3, 3\}} means a line starting at point (1, 1), passing point (2, 2) and ends at (3, 3). All paths drawn on the canvas can be expressed as stroke data.
+Here, stroke data means positions data of points on the strokes. For
+example, stroke \code{\{\{1, 1\}, \{2, 2\}, \{3, 3\}\}} means a line starting at point (1, 1), passing point (2, 2) and ends at (3, 3). All paths drawn on the canvas can be expressed as stroke data. An example of a stroke and its stroke data is shown in Figure \ref{fig:stroke-sample}.
+\begin{figure}
+    \centering
+    \begin{subfigure}{0.6\linewidth}
+        \centering
+        \includegraphics[width=\linewidth, frame]{figures/stroke-example.png}
+        \caption{Example of A Stroke}
+    \end{subfigure}
+    \begin{subfigure}{0.6\linewidth}
+        \centering
+        \includegraphics[width=\linewidth, frame]{figures/stroke-data-example.png}
+        \caption{Stroke Data of the Example}
+    \end{subfigure}
+    \caption{Example of A Stroke and Stroke Data}
+    \label{fig:stroke-sample}
+\end{figure}
 
 Two HTML elements - \code{canvas} and \code{SVG} - were investigated for this part.
 
@@ -448,6 +465,7 @@ In conclusion, \textit{Mathpix} is the best choice regarding accuracy, cost and 
 Another thing to be noted is the equation rendering. \textit{Mathpix} can return a latex styled string of the result, but the string cannot be displayed as an equation in web page. Therefore, a rendering tool is needed to parse the latex string and display the equation in the web page. 
 
 This project uses \code{Katex}, which is the same tool used in Lambda Feedback. It can render a latex styled equation in one line of code \cite{web:katexapi}. Details will be explained in Chapter \ref{vanillajs-implement}.
+\\
 
 This chapter records the background research on React framework, handwriting canvas to use and method of equation recognition, and givs reasons why \code{SVG} element and \textit{Mathpix} are used in the project. In Chapter \ref{Implementation}, the implementation of the Vanilla JS application, conversion to React component and integration with Lambda Feedback is explained.
 
@@ -524,7 +542,7 @@ In \code{canvas} element, three events are being detected:
 \end{itemize}
 
 In this application, three events are connected to function
-\code{handleMouseDown}, \code{handleMouseMove} and \code{handleMouseUp}
+\code{handleMouseDown}, \code{handl-} \code{eMouseMove} and \code{handleMouseUp}
 respectively. Operations in each function are shown in flowchart in Figure
 \ref{fig:flowchart1}.
 
@@ -546,7 +564,7 @@ and marks the pointer state down. Event \code{onMouseMove} is checked every
 browser's event loop. When it is detected, and mouse is down, the position of
 the pointer is recorded to \code{currentStroke} and the \code{canvas} draws a
 line from the previous point obtained from \code{currentStroke} and the current
-position. This is done by methods \code{moveto(previousPoint)} and
+position. This is done by methods \code{moveto(previou-} \code{sPoint)} and
 \code{lineto(currentPoint)} of element \code{canvas}. 
 
 The user can now draw paths on the canvas, and stroke data is recorded in this process. The next section will explain how stroke data is sent to \textit{Mathpix} and how result is fetched and displayed.
@@ -685,7 +703,7 @@ Similar to Vanilla JS, the React component is built in the order of functions.
 The logic of adding strokes to \code{strokeList} remains the same, but instead of using \code{addEventListner}, events and functions are bound via attributes. 
 
 Component \code{HandwritingInput} has three functions, \code{handlePointerDown},
-\code{handlePointerMove} and \code{handlePointerUp}, which have same
+\code{handle-} \code{PointerMove} and \code{handlePointerUp}, which have same
 functionalities as handling functions in Vanilla JS app except for getting the position of the pointer, as this happens in \code{Canvas}. These functions are
 passed to component \code{Canvas} as function typed attributes
 \code{onPointerDown}, \code{onPointerMove} and \code{onPointerUp} respectively.
@@ -746,7 +764,7 @@ However, to distribute strokes to \code{Path}, stroke data must be stroed like:
 \centerline{\code{[Point1, Point2, Point3...]}}
 
 Hence, a function \code{transformData} is written to transform \code{strokeList}
-to \code{strokeUpload} with the data structure required by \textit{Mathpix}. This function is invoked in \code{undo}, \code{redo}, \code{remove} and \code{handleMouseUp}.
+to \code{stroke-} \code{Upload} with the data structure required by \textit{Mathpix}. This function is invoked in \code{undo}, \code{redo}, \code{remove} and \code{handleMouseUp}.
 
 Another change made is that the request function is no longer called
 \code{handleMouseUp} and three button functions. Instead, the React feature
@@ -885,6 +903,8 @@ After this, the handwriting input tool is installed in Lambda Feedback, and
 works well. There is then some updates made to the component to imporve user
 experience.
 
+\section*{Updates}
+\label{imp-updates}
 A grid paper styled background is added to the handwriting area. This is done by
 \code{makeStyle} function provided by Lambda Feedback code, which allows
 creating styles in component. The background is generated by
@@ -895,6 +915,34 @@ Another update is re-aligning sub-components in \code{HandwritingInput}. The
 handwriting area and the result area were aligned vertically, and the result
 might require scrolling down the page to view. They were then re-aligned
 horizontally so that it can be seen directly.
+
+In addition, a new function was attempted on the unintegrated React component -
+add a new method of removing a function. It was not developed on the integrated
+version so that it is easier to test. The method is that the user draws a stroke which covers another stroke, the covered stroke is removed.
+
+This is done by calculating the intersection area and the covered stroke's area of the two strokes. If the proportion of the intersection area to the covered stroke's area is greater than a specific value (defaultly 0.85), it is judged as a remove operation. 
+
+To do this, the programme was slightly refactored. Before, a stroke has a type of \code{Point[]}. However, to store the border position of a stroke, data of maximum and minimum coordinates need to be added. Therefore, a new type \code{Stroke} is created, which has \code{Point[]} representing points of the stroke, and \code{minX}, \code{minY}, \code{maxX}, \code{maxY} to shape the borders of the stroke. 
+
+Another change is that, the current stroke data is added to \code{strokeList} in
+\code{handlePo-} \code{interDown}. However, updates of stroke data is done in
+\code{handlePointerMove} to renew border data, and \code{strokeList} is affected
+as well. Frequent updates will affect the performance of the component.
+Therefore, adding the stroke data to \code{strokeList} is removed to
+\code{handlePointerUp}, so that \code{handlePointerMove} does not need to renew
+\code{strokeList} every time. This thus requires the current stroke to be
+rendered independently. It is done by creating a new \code{Path} in sub-component \code{Canvas}. This as well reduces the load of the page as it only needs to rerender the current stroke instead of the whole \code{strokeList}.
+
+After it was refactored, the function was developed. A flowchart is shown in
+Figure \ref{fig:flowchart-intersection}
+\begin{figure}
+    \centering
+    \includegraphics[width=0.7\linewidth, frame]{figures/flowchart-intersection.png}
+    \caption{Flowchart of Cover-remove Function}
+    \label{fig:flowchart-intersection}
+\end{figure}
+
+This was not implemented to Lambda Feedback as the result is not satisfying. Details will be shown in the next chapter.
 \\
 
 So far, the handwriting input component has been successfully integrated into
@@ -950,6 +998,8 @@ Undo, redo, delete and remove functions works as well. Figure \ref{fig:test-remo
     \caption{Remove Function Test}
     \label{fig:test-remove}
 \end{figure}
+
+The cover-remove function works, but the accuracy is not satisfying. In many cases, the first stroke covering an old stroke does not work, whereas a second stroke covering it is likely to remove the old stroke. In addition, it rarely happened that strokes not covered by the new stroke are removed. This means that the function still needs to be optimised.
 
 \subsection*{Integration Tests}
 After the tests on handwriting input, the result is checked to see if it is submitted, and the component is integrated successfully.
@@ -1014,13 +1064,18 @@ on other symbols. This is considered as a problem related to the evaluation func
 
 Consequently, in most cases, type of the latex string has minor impact to the user
 experience. The lambda symbol problem is probably not related to the types.
+\\
+
+All code of the VanillaJS web application and React component is hosted on GitHub. If there is any update after Aug.31, it will be done in a new branch.
 
 
 \section{Evaluation}
 In Chapter \ref{tests-results}, a series of tests were carried out. The results
 show that the component is able to provide a complete handwriting input approach
 for the user to input mathematical expressions. The recognition is accurate,
-live update is available and response is quick. The answer can be passed to the
+live update is available and response is quick. However, the cover-remove function is not working as expected and needs further improvement.
+
+The answer can be passed to the
 parent component and checked by Lambda Feedback's evaluation function. It can also
 be displayed in the text input box in the format of latex string. Although there are many possible types of latex string returned by \textit{Mathpix}, it is considered having insignificant impact to user experience. However, the problem of the lambda symbol still needs to be solved.
 
@@ -1060,7 +1115,7 @@ cannot be published yet.
 There are several future improvements planned:
 \begin{enumerate}
     \item Seperate the backend. This is necessary for the project. The token request function should be implemented into the backend and the function in client end should be requesting the backend for the token.
-    \item Add new method for removing stroke. Users might find it unconvenient to switch between 'draw' mode and 'remove' mode. A new method that drawing a circle would remove strokes inside, or black out a symbol to remove it is planned to be developed.
+    \item Improve the cover-remove function.
     \item Error handling. Although current programme has some error handlings, they do not cover all errors such as an error object is returned from \textit{Mathpix}. This rarely happens but still needs to be done.
 \end{enumerate}
 
